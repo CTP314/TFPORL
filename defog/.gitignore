@@ -1,0 +1,6 @@
+runs/*
+.vscode
+*.csv
+*.png
+run_all.py
+__pycache__

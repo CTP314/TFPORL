@@ -1,0 +1,55 @@
+defaults:
+  - _self_
+  - env: hopper
+  - model: dt
+
+seeds: 
+- 0
+- 1
+- 2
+- 3
+- 4
+# - 42
+# - 3407 # https://arxiv.org/abs/2109.08203
+
+tag: null
+vec_envs: 1
+
+train:
+  lr: 1e-4
+  weight_decay: 1e-3
+  vec_envs: ${vec_envs}
+  env_name: ${env.env_name}
+  train_steps: 50_000
+  finetune_steps: 10_000
+  batch_size: 256
+  plot_interval: 500
+  eval_interval: 500
+  eval_episodes: 10
+  warmup_steps: 10_000
+  rtg_target: ${env.rtg_target}
+  eval_drop_ps: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+
+buffer:
+  _target_: buffer.SequenceBuffer
+  env_name: ${env.env_name}
+  dataset: medium
+  sample_type: traj_length
+  context_len: ${model.context_len}
+  gamma: 1.0
+  drop_cfg:
+    drop_fn: const
+    drop_p: 0.8
+    finetune_drop_p: 0.8
+    update_interval: 500
+    drop_aware: ${model.drop_aware}
+  
+model:
+  max_timestep: ${env.max_timestep}
+  
+
+hydra:
+  job:
+    chdir: true
+  run:
+    dir: ./runs/${now:%Y-%m-%d}/${now:%H-%M-%S}_${hydra.job.override_dirname}
